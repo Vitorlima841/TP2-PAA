@@ -106,3 +106,25 @@ public class LetraB {
         }
     }
 }
+
+
+/* 
+Aqui está um resumo direto e compacto, ideal para colocar no PDF:
+
+# Resumo dos Resultados
+
+O maior tamanho de entrada resolvido de forma viável foi n = 30, levando ≈ 60.829 ms.
+Para n = 32, o tempo subiu para ≈ 249.197 ms, tornando a execução inviável.
+
+Isso ocorre porque o algoritmo de força bruta possui complexidade exponencial ( O(2^n) ).
+Cada aumento de 1 no valor de n dobra o número de combinações, e aumentar de 30 para 32 multiplica o tempo por aproximadamente 4 — comportamento típico de algoritmos exponenciais.
+
+### Estimativa para uma entrada dez vezes maior (n = 300)
+
+O tempo seria aproximadamente:
+
+[T(300) ≈ 6 x 10^85ms ≈ 10^75 anos]
+
+Esse valor é incomparavelmente maior que a idade do universo, demonstrando que a força bruta não escala para entradas maiores.
+
+*/
