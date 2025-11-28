@@ -1,81 +1,108 @@
-import java.util.*;
-
 public class LetraB {
 
-    static class ItemComparator implements Comparator<int[]> {
-        public int compare(int[] a, int[] b) {
-            double a1 = (1.0 * a[0]) / a[1];
-            double b1 = (1.0 * b[0]) / b[1];
-            return Double.compare(b1, a1);
-        }
-    }
+    public static class Resultado {
+        public final int melhorValor;
+        public final int melhorPeso;
+        public final boolean[] selecionados;
 
-    static class ResultadoItem {
-        int valor;
-        int peso;
-        double porcentagem;
-
-        public ResultadoItem(int valor, int peso, double porcentagem) {
-            this.valor = valor;
-            this.peso = peso;
-            this.porcentagem = porcentagem;
+        public Resultado(int melhorValor, int melhorPeso, boolean[] selecionados) {
+            this.melhorValor = melhorValor;
+            this.melhorPeso = melhorPeso;
+            this.selecionados = selecionados;
         }
 
         @Override
         public String toString() {
-            return String.format(
-                    "Valor: %d, Peso: %d, Porcentagem usada: %.2f%%",
-                    valor, peso, porcentagem * 100
-            );
+            StringBuilder sb = new StringBuilder();
+            sb.append("Melhor valor total: ").append(melhorValor).append("\n");
+            sb.append("Melhor peso total: ").append(melhorPeso).append("\n");
+            sb.append("Itens escolhidos (índice, peso, valor):\n");
+
+            for (int i = 0; i < selecionados.length; i++) {
+                if (selecionados[i]) {
+                    sb.append("  Item ").append(i).append("\n");
+                }
+            }
+            return sb.toString();
         }
     }
 
-    static double fractionalKnapsack(int[] val, int[] wt, int capacity, List<ResultadoItem> itensSelecionados) {
-        int n = val.length;
-        int[][] items = new int[n][2];
+    public static Resultado mochilaForcaBruta(int[] pesos, int[] valores, int capacidade) {
+        int n = pesos.length;
+        boolean[] selecionados = new boolean[n];
+        boolean[] melhorEscolha = new boolean[n];
 
-        for (int i = 0; i < n; i++) {
-            items[i][0] = val[i];
-            items[i][1] = wt[i];
-        }
+        int melhorValor = 0;
+        int melhorPeso = 0;
 
-        Arrays.sort(items, new ItemComparator());
+        long total = 1L << n; // 2^n
 
-        double resultado = 0.0;
-        int capacidadeAtual = capacity;
+        for (long mask = 0; mask < total; mask++) {
+            int pesoAtual = 0;
+            int valorAtual = 0;
 
-        for (int i = 0; i < n; i++) {
-            int valor = items[i][0];
-            int peso = items[i][1];
+            for (int i = 0; i < n; i++) {
+                if ((mask & (1L << i)) != 0) {
+                    pesoAtual += pesos[i];
+                    valorAtual += valores[i];
+                    selecionados[i] = true;
+                } else {
+                    selecionados[i] = false;
+                }
+            }
 
-            if (peso <= capacidadeAtual) {
-                resultado += valor;
-                capacidadeAtual -= peso;
-                itensSelecionados.add(new ResultadoItem(valor, peso, 1.0));
-            } else {
-                double porcentagem = (double) capacidadeAtual / peso;
-                resultado += valor * porcentagem;
-                itensSelecionados.add(new ResultadoItem(valor, peso, porcentagem));
-                break;
+            if (pesoAtual <= capacidade && valorAtual > melhorValor) {
+                melhorValor = valorAtual;
+                melhorPeso = pesoAtual;
+                System.arraycopy(selecionados, 0, melhorEscolha, 0, n);
             }
         }
 
-        return resultado;
+        return new Resultado(melhorValor, melhorPeso, melhorEscolha);
     }
 
     public static void main(String[] args) {
-        int[] val = { 60, 100, 120 };
-        int[] wt = { 10, 20, 30 };
-        int capacidade = 50;
 
-        List<ResultadoItem> escolhidos = new ArrayList<>();
+        for (int n = 1; n <= 60; n++) {
+            int[] pesos = new int[n];
+            int[] valores = new int[n];
+            int capacidade = n * 2;
 
-        double resultado = fractionalKnapsack(val, wt, capacidade, escolhidos);
+            for (int i = 0; i < n; i++) {
+                pesos[i] = 1 + (int) (Math.random() * 5);
+                valores[i] = 1 + (int) (Math.random() * 10);
+            }
 
-        System.out.println("Valor máximo = " + resultado);
-        System.out.println("\nItens selecionados:");
-        for (ResultadoItem ri : escolhidos) {
-            System.out.println(ri);
+            long tempoInicial = System.currentTimeMillis();
+            Resultado r = mochilaForcaBruta(pesos, valores, capacidade);
+            long tempoFinal = System.currentTimeMillis();
+
+            long tempo = tempoFinal - tempoInicial;
+
+            System.out.println("n = " + n + " | tempo = " + tempo + " ms");
+            System.out.println("Capacidade = " + capacidade);
+
+            // Mostrar todos os pesos
+            System.out.print("Todos os pesos: ");
+            for (int p : pesos) System.out.print(p + " | ");
+            System.out.println();
+
+            // Mostrar todos os valores
+            System.out.print("Todos os valores: ");
+            for (int v : valores) System.out.print(v + " | ");
+            System.out.println();
+
+            // Mostrar itens escolhidos com seus respectivos pesos e valores
+            System.out.println("\nItens selecionados:");
+            for (int i = 0; i < n; i++) {
+                if (r.selecionados[i]) {
+                    System.out.println("peso = " + pesos[i] + " | valor = " + valores[i]);
+                }
+            }
+
+            System.out.println("Melhor valor total = " + r.melhorValor);
+            System.out.println("Melhor peso total = " + r.melhorPeso);
+            System.out.println("\n=======================================\n");
         }
     }
 }
