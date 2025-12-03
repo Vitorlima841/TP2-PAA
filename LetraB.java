@@ -109,8 +109,6 @@ public class LetraB {
 
 
 /* 
-Aqui está um resumo direto e compacto, ideal para colocar no PDF:
-
 # Resumo dos Resultados
 
 O maior tamanho de entrada resolvido de forma viável foi n = 30, levando ≈ 60.829 ms.
@@ -128,3 +126,9 @@ O tempo seria aproximadamente:
 Esse valor é incomparavelmente maior que a idade do universo, demonstrando que a força bruta não escala para entradas maiores.
 
 */
+
+/*  ------------------------- LETRA E ---------------------------------------------
+ *  A complexidade do algoriomo da letra B é 2^N
+ *  A complexidade da letra C é pseudo polinomia (n*W) onde cresce de forma exponencial baseado no W
+ *  A complexidade da letra D é n logn (pois precisa orenar primeiro)
+ */
