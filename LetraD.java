@@ -75,8 +75,8 @@ public class LetraD {
 
     public static void main(String[] args) {
         int capacidade = 15;
-        int[] pesos = {15, 1, 1, 2, 1, 2, 3, 4, 2, 3};
-        int[] valores = {15, 14, 13, 12, 1, 5, 1, 5, 4, 4};
+        int[] pesos = {5, 4, 1, 2, 1, 2, 3, 4, 2, 3};
+        int[] valores = {1, 8, 6, 6, 1, 5, 1, 5, 4, 4};
 
         Item[] itens = new Item[10];
 
