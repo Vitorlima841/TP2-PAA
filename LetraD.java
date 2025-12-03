@@ -26,38 +26,17 @@ public class LetraD {
         }
     }
 
-    public static Resultado mochilaForcaBruta(int[] pesos, int[] valores, int capacidade) {
-        int n = pesos.length;
-        boolean[] selecionados = new boolean[n];
-        boolean[] melhorEscolha = new boolean[n];
+    public static void mochilaProgramacaoGulosa(int[] pesos, int[] valores, int capacidade) {
+        int valorTotal = 0;
+        int pesoTotal = 0;
 
-        int melhorValor = 0;
-        int melhorPeso = 0;
-
-        long total = 1L << n; // 2^n
-
-        for (long mask = 0; mask < total; mask++) {
-            int pesoAtual = 0;
-            int valorAtual = 0;
-
-            for (int i = 0; i < n; i++) {
-                if ((mask & (1L << i)) != 0) {
-                    pesoAtual += pesos[i];
-                    valorAtual += valores[i];
-                    selecionados[i] = true;
-                } else {
-                    selecionados[i] = false;
-                }
-            }
-
-            if (pesoAtual <= capacidade && valorAtual > melhorValor) {
-                melhorValor = valorAtual;
-                melhorPeso = pesoAtual;
-                System.arraycopy(selecionados, 0, melhorEscolha, 0, n);
+        for(int i = 0; i < valores.length; i++){
+            if(pesos[i] <= capacidade){
+                System.out.println("Objeto escolhido : " + pesos[i] + "V " + valores[i]);
             }
         }
 
-        return new Resultado(melhorValor, melhorPeso, melhorEscolha);
+        return;
     }
 
     static int partition(int[] arr, int low, int high) {
@@ -96,25 +75,13 @@ public class LetraD {
         quickSort(valores, 0, valores.length - 1);
 
         long tempoInicial = System.currentTimeMillis();
-        Resultado r = mochilaForcaBruta(pesos, valores, capacidade);
+        mochilaProgramacaoGulosa(pesos, valores, capacidade);
         long tempoFinal = System.currentTimeMillis();
-
-        for(int i = 0; i < valores.length; i++){
-            System.out.println("aaaa " + valores[i]);
-        }
 
         long tempo = tempoFinal - tempoInicial;
 
         System.out.println("\nTempo = " + tempo + " ms");
 
         System.out.println("\nItens selecionados:");
-        for (int i = 0; i < 10; i++) {
-            if (r.selecionados[i]) {
-                System.out.println("Item " + i + " -> peso = " + pesos[i] + ", valor = " + valores[i]);
-            }
-        }
-
-        System.out.println("\nMelhor valor total = " + r.melhorValor);
-        System.out.println("Melhor peso total = " + r.melhorPeso + "\n");
     }
 }
