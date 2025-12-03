@@ -3,11 +3,13 @@ public class LetraD {
         public int valor;
         public int peso;
         public boolean foiSelecionado;
+        public double densidade;
 
         public Item(int valor, int peso, boolean foiSelecionado) {
-            this.peso = peso;
             this.valor = valor;
+            this.peso = peso;
             this.foiSelecionado = foiSelecionado;
+            this.densidade = (double) valor / peso;
         }
     }
 
@@ -42,18 +44,18 @@ public class LetraD {
         return itensSelecionados;
     }
 
-    static int partition(Item[] arr, int low, int high) {
-        int pivot = arr[high].valor;
+    static int partition(Item[] itens, int low, int high) {
+        double pivot = itens[high].densidade;
         int i = low - 1;
 
         for (int j = low; j <= high - 1; j++) {
-            if (arr[j].valor > pivot) {
+            if (itens[j].densidade > pivot) {
                 i++;
-                swap(arr, i, j);
+                swap(itens, i, j);
             }
         }
         
-        swap(arr, i + 1, high);  
+        swap(itens, i + 1, high);
         return i + 1;
     }
 
@@ -73,8 +75,8 @@ public class LetraD {
 
     public static void main(String[] args) {
         int capacidade = 15;
-        int[] pesos = {5, 4, 1, 2, 1, 2, 3, 4, 2, 3};
-        int[] valores = {1, 8, 6, 6, 1, 5, 1, 5, 4, 4};
+        int[] pesos = {15, 1, 1, 2, 1, 2, 3, 4, 2, 3};
+        int[] valores = {15, 14, 13, 12, 1, 5, 1, 5, 4, 4};
 
         Item[] itens = new Item[10];
 
@@ -82,7 +84,7 @@ public class LetraD {
             itens[i] = new Item(valores[i], pesos[i], false);
         }
 
-        quickSort(itens, 0, valores.length - 1);
+        quickSort(itens, 0, itens.length - 1);
 
         long tempoInicial = System.currentTimeMillis();
         Item[] itensSelecionados = mochilaProgramacaoGulosa(itens, capacidade);
@@ -90,8 +92,8 @@ public class LetraD {
 
         long tempo = tempoFinal - tempoInicial;
 
-        for (Item itensSelecionado : itensSelecionados) {
-            System.out.println("Itens Selecionados: " + itensSelecionado.valor + " | " + itensSelecionado.peso + " | " + itensSelecionado.foiSelecionado);
+        for (Item item : itensSelecionados) {
+            System.out.println("Selecionado: valor = " + item.valor + " | peso = " + item.peso + " | densidade = " + item.densidade);
         }
         System.out.println("\nTempo = " + tempo + " ms");
     }
