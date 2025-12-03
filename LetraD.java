@@ -1,49 +1,53 @@
 public class LetraD {
-    public static class Resultado {
-        public final int melhorValor;
-        public final int melhorPeso;
-        public final boolean[] selecionados;
+    public static class Item {
+        public int valor;
+        public int peso;
+        public boolean foiSelecionado;
 
-        public Resultado(int melhorValor, int melhorPeso, boolean[] selecionados) {
-            this.melhorValor = melhorValor;
-            this.melhorPeso = melhorPeso;
-            this.selecionados = selecionados;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Melhor valor total: ").append(melhorValor).append("\n");
-            sb.append("Melhor peso total: ").append(melhorPeso).append("\n");
-            sb.append("Itens escolhidos (índice, peso, valor):\n");
-
-            for (int i = 0; i < selecionados.length; i++) {
-                if (selecionados[i]) {
-                    sb.append("  Item ").append(i).append("\n");
-                }
-            }
-            return sb.toString();
+        public Item(int valor, int peso, boolean foiSelecionado) {
+            this.peso = peso;
+            this.valor = valor;
+            this.foiSelecionado = foiSelecionado;
         }
     }
 
-    public static void mochilaProgramacaoGulosa(int[] pesos, int[] valores, int capacidade) {
+    public static Item[] mochilaProgramacaoGulosa(Item[] itens, int capacidade) {
+        int n = itens.length;
         int valorTotal = 0;
         int pesoTotal = 0;
+        int capacidadeAtualizada = capacidade;
 
-        for(int i = 0; i < valores.length; i++){
-            if(pesos[i] <= capacidade){
-                System.out.println("Objeto escolhido : " + pesos[i] + "V " + valores[i]);
+        Item[] itensSelecionadosTemp = new Item[n];
+        int indiceSelecionado = 0;
+
+        for (int i = 0; i < n; i++) {
+            if (itens[i].peso <= capacidadeAtualizada) {
+                capacidadeAtualizada -= itens[i].peso;
+                valorTotal += itens[i].valor;
+                pesoTotal += itens[i].peso;
+                itens[i].foiSelecionado = true;
+
+                itensSelecionadosTemp[indiceSelecionado] = itens[i];
+                indiceSelecionado++;
             }
         }
 
-        return;
+        Item[] itensSelecionados = new Item[indiceSelecionado];
+        for (int i = 0; i < indiceSelecionado; i++) {
+            itensSelecionados[i] = itensSelecionadosTemp[i];
+        }
+
+        System.out.println("Valor total: " + valorTotal + " | Peso: " + pesoTotal + " | Capacidade: " + capacidade);
+
+        return itensSelecionados;
     }
 
-    static int partition(int[] arr, int low, int high) {
-        int pivot = arr[high];
+    static int partition(Item[] arr, int low, int high) {
+        int pivot = arr[high].valor;
         int i = low - 1;
+
         for (int j = low; j <= high - 1; j++) {
-            if (arr[j] > pivot) {
+            if (arr[j].valor > pivot) {
                 i++;
                 swap(arr, i, j);
             }
@@ -53,13 +57,13 @@ public class LetraD {
         return i + 1;
     }
 
-    static void swap(int[] arr, int i, int j) {
-        int temp = arr[i];
+    static void swap(Item[] arr, int i, int j) {
+        Item temp = arr[i];
         arr[i] = arr[j];
         arr[j] = temp;
     }
 
-    static void quickSort(int[] arr, int low, int high) {
+    static void quickSort(Item[] arr, int low, int high) {
         if (low < high) {
             int pi = partition(arr, low, high);
             quickSort(arr, low, pi - 1);
@@ -68,20 +72,27 @@ public class LetraD {
     }
 
     public static void main(String[] args) {
-        int capacidade = 5;
-        int[] pesos = {5, 4, 1, 2, 1, 2, 3, 4, 2, 3}; 
-        int[] valores = {1, 8, 6, 6, 1, 5, 1, 5, 4, 4}; 
-        
-        quickSort(valores, 0, valores.length - 1);
+        int capacidade = 15;
+        int[] pesos = {5, 4, 1, 2, 1, 2, 3, 4, 2, 3};
+        int[] valores = {1, 8, 6, 6, 1, 5, 1, 5, 4, 4};
+
+        Item[] itens = new Item[10];
+
+        for(int i = 0; i < 10; i++){
+            itens[i] = new Item(valores[i], pesos[i], false);
+        }
+
+        quickSort(itens, 0, valores.length - 1);
 
         long tempoInicial = System.currentTimeMillis();
-        mochilaProgramacaoGulosa(pesos, valores, capacidade);
+        Item[] itensSelecionados = mochilaProgramacaoGulosa(itens, capacidade);
         long tempoFinal = System.currentTimeMillis();
 
         long tempo = tempoFinal - tempoInicial;
 
+        for (Item itensSelecionado : itensSelecionados) {
+            System.out.println("Itens Selecionados: " + itensSelecionado.valor + " | " + itensSelecionado.peso + " | " + itensSelecionado.foiSelecionado);
+        }
         System.out.println("\nTempo = " + tempo + " ms");
-
-        System.out.println("\nItens selecionados:");
     }
 }
