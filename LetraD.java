@@ -1,100 +1,93 @@
+import java.util.*;
+
 public class LetraD {
-    public static class Item {
-        public int valor;
-        public int peso;
-        public boolean foiSelecionado;
-        public double densidade;
 
-        public Item(int valor, int peso, boolean foiSelecionado) {
-            this.valor = valor;
-            this.peso = peso;
-            this.foiSelecionado = foiSelecionado;
-            this.densidade = (double) valor / peso;
-        }
-    }
+    // Algoritmo exato MOCHILA-EXATO
+    public static List<Integer> knapsackExato(int m, int n, int[] u, int[] w) {
 
-    public static Item[] mochilaProgramacaoGulosa(Item[] itens, int capacidade) {
-        int n = itens.length;
-        int valorTotal = 0;
-        int pesoTotal = 0;
-        int capacidadeAtualizada = capacidade;
+        int sumU = 0;
+        for (int x : u) sumU += x;
 
-        Item[] itensSelecionadosTemp = new Item[n];
-        int indiceSelecionado = 0;
+        int[] dp = new int[sumU + 1];
+        Arrays.fill(dp, Integer.MAX_VALUE / 2);
+        dp[0] = 0;
+
+        int[][] parent = new int[n][sumU + 1];
+        for (int i = 0; i < n; i++)
+            Arrays.fill(parent[i], -1);
 
         for (int i = 0; i < n; i++) {
-            if (itens[i].peso <= capacidadeAtualizada) {
-                capacidadeAtualizada -= itens[i].peso;
-                valorTotal += itens[i].valor;
-                pesoTotal += itens[i].peso;
-                itens[i].foiSelecionado = true;
-
-                itensSelecionadosTemp[indiceSelecionado] = itens[i];
-                indiceSelecionado++;
+            for (int v = sumU; v >= u[i]; v--) {
+                if (dp[v - u[i]] + w[i] < dp[v]) {
+                    dp[v] = dp[v - u[i]] + w[i];
+                    parent[i][v] = v - u[i];
+                }
             }
         }
 
-        Item[] itensSelecionados = new Item[indiceSelecionado];
-        for (int i = 0; i < indiceSelecionado; i++) {
-            itensSelecionados[i] = itensSelecionadosTemp[i];
+        int bestV = 0;
+        for (int v = 0; v <= sumU; v++) {
+            if (dp[v] <= m) bestV = v;
         }
 
-        System.out.println("Valor total: " + valorTotal + " | Peso: " + pesoTotal + " | Capacidade: " + capacidade);
-
-        return itensSelecionados;
-    }
-
-    static int partition(Item[] itens, int low, int high) {
-        double pivot = itens[high].densidade;
-        int i = low - 1;
-
-        for (int j = low; j <= high - 1; j++) {
-            if (itens[j].densidade > pivot) {
-                i++;
-                swap(itens, i, j);
+        List<Integer> items = new ArrayList<>();
+        int v = bestV;
+        for (int i = n - 1; i >= 0; i--) {
+            if (parent[i][v] != -1) {
+                items.add(i);
+                v = parent[i][v];
             }
         }
-        
-        swap(itens, i + 1, high);
-        return i + 1;
+
+        return items;
     }
 
-    static void swap(Item[] arr, int i, int j) {
-        Item temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
+    // Algoritmo aproximado MOCHILA-IKε
+    public static List<Integer> mochilaIKE(int m, int n, int[] v, int[] w, double eps) {
+
+        boolean algumCabe = false;
+        for (int wi : w)
+            if (wi <= m) algumCabe = true;
+
+        if (!algumCabe)
+            return new ArrayList<>();
+
+        int theta = 0;
+        for (int i = 0; i < n; i++)
+            if (w[i] <= m)
+                theta = Math.max(theta, v[i]);
+
+        double lambda = (eps * theta) / n;
+
+        int[] u = new int[n];
+        for (int i = 0; i < n; i++)
+            u[i] = (int) Math.floor(v[i] / lambda);
+
+        return knapsackExato(m, n, u, w);
     }
 
-    static void quickSort(Item[] arr, int low, int high) {
-        if (low < high) {
-            int pi = partition(arr, low, high);
-            quickSort(arr, low, pi - 1);
-            quickSort(arr, pi + 1, high);
-        }
-    }
 
+    // Exemplo de uso (agora imprime valor final)
     public static void main(String[] args) {
-        int capacidade = 15;
-        int[] pesos = {5, 4, 1, 2, 1, 2, 3, 4, 2, 3};
-        int[] valores = {1, 8, 6, 6, 1, 5, 1, 5, 4, 4};
 
-        Item[] itens = new Item[10];
+        int m = 10;
+        int[] w = {4, 8, 5, 3};
+        int[] v = {5, 12, 8, 1};
+        double eps = 0.1;
 
-        for(int i = 0; i < 10; i++){
-            itens[i] = new Item(valores[i], pesos[i], false);
+        List<Integer> sol = mochilaIKE(m, v.length, v, w, eps);
+
+        int valorTotal = 0;
+        int pesoTotal = 0;
+
+        System.out.println("Itens escolhidos: " + sol);
+
+        for (int i : sol) {
+            valorTotal += v[i];
+            pesoTotal += w[i];
         }
 
-        quickSort(itens, 0, itens.length - 1);
-
-        long tempoInicial = System.currentTimeMillis();
-        Item[] itensSelecionados = mochilaProgramacaoGulosa(itens, capacidade);
-        long tempoFinal = System.currentTimeMillis();
-
-        long tempo = tempoFinal - tempoInicial;
-
-        for (Item item : itensSelecionados) {
-            System.out.println("Selecionado: valor = " + item.valor + " | peso = " + item.peso + " | densidade = " + item.densidade);
-        }
-        System.out.println("\nTempo = " + tempo + " ms");
+        System.out.println("Valor total da mochila = " + valorTotal);
+        System.out.println("Peso total = " + pesoTotal + " / capacidade = " + m);
     }
 }
