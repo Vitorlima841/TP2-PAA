@@ -109,7 +109,6 @@ public class LetraB {
 
 
 /* 
-# Resumo dos Resultados
 
 O maior tamanho de entrada resolvido de forma viável foi n = 30, levando ≈ 60.829 ms.
 Para n = 32, o tempo subiu para ≈ 249.197 ms, tornando a execução inviável.

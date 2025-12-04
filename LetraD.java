@@ -2,92 +2,132 @@ import java.util.*;
 
 public class LetraD {
 
-    // Algoritmo exato MOCHILA-EXATO
-    public static List<Integer> knapsackExato(int m, int n, int[] u, int[] w) {
+    // ------------------------------------------------------------
+    // Estrutura de resultado
+    // ------------------------------------------------------------
+    public static class Resultado {
+        public int valorTotal;
+        public int pesoTotal;
+        public List<Integer> itens;
 
-        int sumU = 0;
-        for (int x : u) sumU += x;
+        public Resultado(int valorTotal, int pesoTotal, List<Integer> itens) {
+            this.valorTotal = valorTotal;
+            this.pesoTotal = pesoTotal;
+            this.itens = itens;
+        }
+    }
 
-        int[] dp = new int[sumU + 1];
-        Arrays.fill(dp, Integer.MAX_VALUE / 2);
-        dp[0] = 0;
+    // ------------------------------------------------------------
+    // ALGORITMO MOCHILA-EXATO
+    // ------------------------------------------------------------
+    public static Resultado mochilaExato(int m, int n, int[] v, int[] w) {
 
-        int[][] parent = new int[n][sumU + 1];
-        for (int i = 0; i < n; i++)
-            Arrays.fill(parent[i], -1);
+        int Vsum = Arrays.stream(v).sum();
 
-        for (int i = 0; i < n; i++) {
-            for (int v = sumU; v >= u[i]; v--) {
-                if (dp[v - u[i]] + w[i] < dp[v]) {
-                    dp[v] = dp[v - u[i]] + w[i];
-                    parent[i][v] = v - u[i];
+        // DP[i][j] = menor peso possível usando itens até i para valor total j
+        int[][] DP = new int[n + 1][Vsum + 1];
+
+        // inicialização
+        for (int i = 0; i <= n; i++) {
+            DP[i][0] = 0;
+        }
+        for (int j = 1; j <= Vsum; j++) {
+            DP[0][j] = Integer.MAX_VALUE / 4; // infinito
+        }
+
+        // preenche DP
+        for (int i = 1; i <= n; i++) {
+            for (int j = 0; j <= Vsum; j++) {
+
+                if (v[i - 1] > j) {
+                    DP[i][j] = DP[i - 1][j];
+                } else {
+                    DP[i][j] = Math.min(
+                            DP[i - 1][j],
+                            w[i - 1] + DP[i - 1][j - v[i - 1]]
+                    );
                 }
             }
         }
 
-        int bestV = 0;
-        for (int v = 0; v <= sumU; v++) {
-            if (dp[v] <= m) bestV = v;
-        }
-
-        List<Integer> items = new ArrayList<>();
-        int v = bestV;
-        for (int i = n - 1; i >= 0; i--) {
-            if (parent[i][v] != -1) {
-                items.add(i);
-                v = parent[i][v];
+        // encontra maior valor j com peso <= m
+        int melhorValor = 0;
+        for (int j = Vsum; j >= 0; j--) {
+            if (DP[n][j] <= m) {
+                melhorValor = j;
+                break;
             }
         }
 
-        return items;
+        // reconstrói solução
+        List<Integer> itens = new ArrayList<>();
+        int j = melhorValor;
+
+        for (int i = n; i > 0; i--) {
+            if (DP[i][j] != DP[i - 1][j]) {
+                itens.add(i - 1);
+                j -= v[i - 1];
+            }
+        }
+
+        int pesoTotal = itens.stream().mapToInt(k -> w[k]).sum();
+
+        return new Resultado(melhorValor, pesoTotal, itens);
     }
 
-    // Algoritmo aproximado MOCHILA-IKε
-    public static List<Integer> mochilaIKE(int m, int n, int[] v, int[] w, double eps) {
+    // ------------------------------------------------------------
+    // ALGORITMO MOCHILA-IKɛ
+    // ------------------------------------------------------------
+    public static Resultado mochilaIK(int m, int n, int[] v, int[] w, double epsilon) {
 
-        boolean algumCabe = false;
-        for (int wi : w)
-            if (wi <= m) algumCabe = true;
+        // PASSO 1: se todos os pesos > m, retorno vazio
+        boolean impossivel = true;
+        for (int peso : w) {
+            if (peso <= m) {
+                impossivel = false;
+                break;
+            }
+        }
+        if (impossivel) {
+            return new Resultado(0, 0, new ArrayList<>());
+        }
 
-        if (!algumCabe)
-            return new ArrayList<>();
-
+        // PASSO 2: θ = maior valor de item admissível
         int theta = 0;
-        for (int i = 0; i < n; i++)
-            if (w[i] <= m)
-                theta = Math.max(theta, v[i]);
+        for (int i = 0; i < n; i++) {
+            if (w[i] <= m && v[i] > theta) {
+                theta = v[i];
+            }
+        }
 
-        double lambda = (eps * theta) / n;
+        // PASSO 3: λ = (epsilon * θ) / n
+        double lambda = (epsilon * theta) / n;
 
+        // PASSO 4: u_i = floor(v_i / λ)
         int[] u = new int[n];
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < n; i++) {
             u[i] = (int) Math.floor(v[i] / lambda);
+        }
 
-        return knapsackExato(m, n, u, w);
+        // PASSO 5: chama mochila-exata com valores escalados
+        return mochilaExato(m, n, u, w);
     }
 
-
-    // Exemplo de uso (agora imprime valor final)
+    // ------------------------------------------------------------
+    // MAIN PARA TESTES
+    // ------------------------------------------------------------
     public static void main(String[] args) {
-
         int m = 10;
         int[] w = {4, 8, 5, 3};
         int[] v = {5, 12, 8, 1};
-        double eps = 0.1;
+        int n = v.length;
 
-        List<Integer> sol = mochilaIKE(m, v.length, v, w, eps);
+        double epsilon = 0.1;
 
-        int valorTotal = 0;
-        int pesoTotal = 0;
+        Resultado r = mochilaIK(m, n, v, w, epsilon);
 
-        System.out.println("Itens escolhidos: " + sol);
-
-        for (int i : sol) {
-            valorTotal += v[i];
-            pesoTotal += w[i];
-        }
-
-        System.out.println("Valor total da mochila = " + valorTotal);
-        System.out.println("Peso total = " + pesoTotal + " / capacidade = " + m);
+        System.out.println("Valor aproximado (u_i): " + r.valorTotal);
+        System.out.println("Peso total: " + r.pesoTotal);
+        System.out.println("Itens escolhidos: " + r.itens);
     }
 }
