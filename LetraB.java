@@ -130,5 +130,7 @@ Esse valor é incomparavelmente maior que a idade do universo, demonstrando que 
 /*  ------------------------- LETRA E ---------------------------------------------
  *  A complexidade do algoriomo da letra B é 2^N
  *  A complexidade da letra C é pseudo polinomia (n*W) onde cresce de forma exponencial baseado no W
- *  A complexidade da letra D é n logn (pois precisa orenar primeiro)
+ *  A complexidade da letra D é O(𝑛^3/𝜀), onde 𝜀 é um número racional entre 0 e 1, escolhido pelo usuário, 
+ *            que indica o quanto você aceita perder de qualidade da solução em troca de velocidade.
+ *            Demonstrando: O(n*W), onde W = O(n^2/𝜀), portanto O(𝑛^3/𝜀).
  */
