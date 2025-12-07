@@ -1,123 +1,70 @@
 import java.util.*;
-import java.lang.Math;
 
 public class LetraC {
 
-    public static class Result {
-        public double valorAprox;
-        public List<ItemFrac> itens;
+    public static class Resultado {
+        public double valorOtimo;
+        public List<Integer> itens; 
 
-        public Result(double valorAprox, List<ItemFrac> itens) {
-            this.valorAprox = valorAprox;
+        public Resultado(double valorOtimo, List<Integer> itens) {
+            this.valorOtimo = valorOtimo;
             this.itens = itens;
         }
     }
 
-    public static class ItemFrac {
-        public int index;
-        public double fracao;
-
-        public ItemFrac(int index, double fracao) {
-            this.index = index;
-            this.fracao = fracao;
-        }
-
-        @Override
-        public String toString() {
-            return "(" + index + ", " + fracao + ")";
-        }
-    }
-
-    public static Result fractionalKnapsackDpApprox(
-            double[] weights, double[] values, double capacity, int precision) {
-
+    public static Resultado knapsack01(double[] weights, double[] values, double capacity) {
         int n = weights.length;
+        int W = (int) capacity;
 
-        List<Integer> itemIdx = new ArrayList<>();
-        List<Double> wUnits = new ArrayList<>();
-        List<Double> vUnits = new ArrayList<>();
+        double[][] dp = new double[n + 1][W + 1];
 
-        for (int i = 0; i < n; i++) {
-            if (weights[i] <= 0) continue;
+        // ------------------------------
+        // Preenche tabela DP
+        // ------------------------------
+        for (int i = 1; i <= n; i++) {
+            int w = (int) weights[i - 1];
+            double v = values[i - 1];
 
-            int pieces = Math.max(1, (int) Math.ceil(weights[i] * precision));
-            double wUnit = weights[i] / pieces;
-            double vUnit = values[i] / pieces;
+            for (int cap = 0; cap <= W; cap++) {
+                dp[i][cap] = dp[i - 1][cap]; 
 
-            for (int p = 0; p < pieces; p++) {
-                itemIdx.add(i);
-                wUnits.add(wUnit);
-                vUnits.add(vUnit);
-            }
-        }
-
-        int m = itemIdx.size();
-        int capInt = (int) Math.floor(capacity * precision + 1e-9);
-
-        double[] dp = new double[capInt + 1];
-        boolean[][] pick = new boolean[m][capInt + 1];
-
-        int[] intWeights = new int[m];
-        for (int i = 0; i < m; i++) {
-            intWeights[i] = (int) Math.round(wUnits.get(i) * precision);
-        }
-
-        for (int i = 0; i < m; i++) {
-            int w = intWeights[i];
-            double v = vUnits.get(i);
-
-            if (w == 0) continue;
-
-            for (int cap = capInt; cap >= w; cap--) {
-                double newValue = dp[cap - w] + v;
-                if (newValue > dp[cap]) {
-                    dp[cap] = newValue;
-                    pick[i][cap] = true;
+                if (w <= cap) {
+                    dp[i][cap] = Math.max(dp[i][cap], dp[i - 1][cap - w] + v);
                 }
             }
         }
 
-        double valorAprox = dp[capInt];
+        double valorOtimo = dp[n][W];
 
-        int cap = capInt;
-        int[] unitsTaken = new int[n];
+        // ------------------------------
+        // Backtracking — recupera itens
+        // ------------------------------
+        List<Integer> itensEscolhidos = new ArrayList<>();
+        int cap = W;
 
-        for (int i = m - 1; i >= 0; i--) {
-            if (cap >= 0 && pick[i][cap]) {
-                int originalIdx = itemIdx.get(i);
-                unitsTaken[originalIdx]++;
-                cap -= intWeights[i];
+        for (int i = n; i >= 1; i--) {
+            if (dp[i][cap] != dp[i - 1][cap]) {
+                itensEscolhidos.add(i - 1);
+                cap -= (int) weights[i - 1];
             }
         }
 
-        int[] piecesPerItem = new int[n];
-        for (int i = 0; i < n; i++) {
-            piecesPerItem[i] = Math.max(1, (int) Math.ceil(weights[i] * precision));
-        }
+        Collections.reverse(itensEscolhidos);
 
-        List<ItemFrac> resultadoItems = new ArrayList<>();
-
-        for (int i = 0; i < n; i++) {
-            double frac = (double) unitsTaken[i] / piecesPerItem[i];
-            if (frac > 0) {
-                resultadoItems.add(new ItemFrac(i, Math.min(1.0, frac)));
-            }
-        }
-
-        return new Result(valorAprox, resultadoItems);
+        return new Resultado(valorOtimo, itensEscolhidos);
     }
 
     public static void main(String[] args) {
-        double[] pesos = {10, 40, 20, 30};
-        double[] valores = {60, 40, 100, 120};
-        double capacidade = 50;
+        double[] pesos = {1, 4, 2, 3};
+        double[] valores = {6, 4, 10, 12};
+        double capacidade = 5;
 
-        Result r = fractionalKnapsackDpApprox(pesos, valores, capacidade, 10);
+        Resultado r = knapsack01(pesos, valores, capacidade);
 
-        System.out.println("Valor aprox (DP): " + r.valorAprox);
+        System.out.println("Valor ótimo: " + r.valorOtimo);
         System.out.println("Itens escolhidos:");
-        for (ItemFrac it : r.itens) {
-            System.out.println(it);
+        for (int idx : r.itens) {
+            System.out.println("Item " + idx);
         }
     }
 }
