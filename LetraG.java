@@ -4,14 +4,13 @@ public class LetraG {
 
         // ----------------------------------------------------
         // DADOS DE TESTE
-        // (pode alterar conforme quiser)
         // ----------------------------------------------------
         int[] v = {5, 12, 8, 1};
         int[] w = {4, 8, 5, 3};
         double capacidade = 5;
         double eps = 0.1;
 
-        // Conversão para double[] pois a LetraC usa double
+        // Conversão para double pois a LetraC usa double
         double[] wDouble = toDoubleArray(w);
         double[] vDouble = toDoubleArray(v);
 

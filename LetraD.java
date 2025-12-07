@@ -22,7 +22,7 @@ public class LetraD {
 
         int n = v.length;
 
-        // 1) Descobrir θ = maior valor de item admissível pelo peso
+        //Descobrir θ = maior valor de item admissível pelo peso
         int theta = 0;
         for (int i = 0; i < n; i++) {
             if (w[i] <= m && v[i] > theta) {
@@ -30,7 +30,7 @@ public class LetraD {
             }
         }
 
-        // 2) Calcular λ
+        //Calcular λ
         double lambda = (eps * theta) / n;
 
         // 3) Criar valores escalados u[i]
@@ -39,7 +39,7 @@ public class LetraD {
             u[i] = (int) Math.floor(v[i] / lambda);
         }
 
-        // 4) Descobrir soma máxima de u[i]
+        //Descobrir soma máxima de u[i]
         int U = 0;
         for (int ui : u) U += ui;
 
@@ -66,7 +66,7 @@ public class LetraD {
             }
         }
 
-        // 5) O melhor valor escalado é o maior val com DP[n][val] ≤ m
+        //O melhor valor escalado é o maior val com DP[n][val] ≤ m
         int melhorVal = 0;
         for (int val = U; val >= 0; val--) {
             if (DP[n][val] <= m) {
@@ -75,7 +75,7 @@ public class LetraD {
             }
         }
 
-        // 6) Reconstrução dos itens escolhidos
+        //Reconstrução dos itens escolhidos
         List<Integer> itens = new ArrayList<>();
         int val = melhorVal;
         int i = n;
@@ -93,13 +93,13 @@ public class LetraD {
             }
         }
 
-        // 7) Calcular valor REAL dos itens escolhidos
+        //Calcular valor REAL dos itens escolhidos
         int valorReal = 0;
         for (int idx : itens) {
             valorReal += v[idx];
         }
 
-        // 8) Montar resultado
+        //Montar resultado
         Resultado r = new Resultado();
         r.valorEscalado = melhorVal;
         r.valorReal = valorReal;
