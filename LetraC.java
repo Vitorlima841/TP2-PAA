@@ -56,7 +56,7 @@ public class LetraC {
 
     public static void main(String[] args) {
         double[] pesos = {4, 8, 5, 3};
-        double[] valores = {5, 12, 8, 1};
+        double[] valores = {50, 120, 80, 10};
         double capacidade = 5;
 
         Resultado r = knapsack01(pesos, valores, capacidade);

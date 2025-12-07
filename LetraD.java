@@ -113,7 +113,7 @@ public class LetraD {
     // ------------------------------------------------------------
     public static void main(String[] args) {
 
-        int[] v = {5, 12, 8, 1};
+        int[] v = {50, 120, 80, 10};
         int[] w = {4, 8, 5, 3};
         int m = 5;
         double eps = 0.1;
